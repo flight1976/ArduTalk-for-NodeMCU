@@ -5,10 +5,10 @@
 #define nODF     10  // The max number of ODFs which the DA can pull.
 
 #include <ESP8266WiFi.h>
-//#include <WiFiClient.h>
+#include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFiMulti.h>
-#include "ESP8266HTTPClient2.h"
+#include "ESP8266HTTPClient.h"
 #include <EEPROM.h>
 
 char IoTtalkServerIP[100] = "";
@@ -16,6 +16,7 @@ String result;
 String url = "";
 String passwordkey ="";
 HTTPClient http;
+WiFiClient wificlient;
 
 String remove_ws(const String& str )
 {
@@ -241,7 +242,7 @@ int iottalk_register(void){
     profile +=  DFlist;
     profile += "]}}";
 
-    http.begin(url);
+    http.begin(wificlient, url);
     http.addHeader("Content-Type","application/json");
     int httpCode = http.POST(profile);
 
@@ -271,7 +272,7 @@ int DFindex(char *df_name){
 }
 
 int push(char *df_name, String value){
-    http.begin( url + String(df_name));
+    http.begin(wificlient, url + String(df_name));
     http.addHeader("Content-Type","application/json");
     String data = "{\"data\":[" + value + "]}";
     int httpCode = http.PUT(data);
@@ -291,7 +292,7 @@ int push(char *df_name, String value){
 }
 
 String pull(char *df_name){
-    http.begin( url + String(df_name) );
+    http.begin(wificlient, url + String(df_name) );
    Serial.println(url + String(df_name));
     http.addHeader("Content-Type","application/json");
     int httpCode = http.GET(); //http state code
